@@ -1,0 +1,219 @@
+FORMAT: 1A
+HOST: https://icarus.cs.weber.edu/~iamcaptaincode/scholarship-rest-f17/v1/
+
+# Scholarship API Fall 2017
+
+Scholarship is a simple REST API to govern student applications for scholarships within the CS Dept.
+
+## Authentication
+
+The authentication for the API is based on JWT tokens, Active Directory credentials are used for credentialing to get an authentication token, wich should be provided on subsequent requests using the ```Authorization``` header.To get a token you should request it using the following call:
+```
+POST /tokens HTTP/1.1
+Content-Type: application/json
+Accept: application/json
+
+{
+    "username": "genericfac",
+    "password": "Hello896"
+}
+```
+
+You will get a response with the jwt like this:
+
+```
+HTTP/1.1 200 Ok
+Content-Type: application/json;
+
+{
+    "JWT.ENCODED.TOKEN"
+}
+```
+After you get an authentication token from the API you will need to include it along every request, so the API can verify it is a valid request made from the application. To do that you need to include the token in the Authorization header, this way: Authorization: Bearer <token>
+
+## Tokens Collection [/tokens]
+
+### Create a Token [POST]
+Create a bearer token to be used with other endpoints to provide federation services. The user credentials are tied to the CS Dept. Active Directory server. (I.E. Athena). 
+Students can use their own Athena credentials to generate a student token. A sample faculty token can be generated with the following information.
+
+* username: genericfac
+* password: Hello896
+
++ Request (application/json)
+
+        {
+            "username": "genericfac",
+            "password": "Hello896"
+        }
+        
++ Response 201 (application/json)
+    + Body
+    
+            "JWT.ENCODED.TOKEN"
+
+
+## Applications Collection [/applications]
+
+### Create an Application [POST]
+Create a new application for a student based on a scholarship.
+
++ Request (application/json)
+
+        {
+            "scholarshipID": "S12345",
+            "responses": [
+                {
+                    "questionID": "Q1",
+                    "responseText": "Student Response to question 1 on scholarship 12345"
+                },
+                {
+                    "questionID": "Q2",
+                    "responseText": "Student Response to question 2 on scholarship 12345"
+                },
+                ...
+            ]
+        }
+
++ Response 201 (application/json)
+
+            {
+                "applicationID": "54321",
+                "userID": "W00001",
+                "scholarshipID": "S12345",
+                "dateCreated": "2017-03-19T07:22Z",
+                "dateModified": "2017-03-19T07:22Z",
+                "responses": [
+                    {
+                        "responseID": "9876",
+                        "questionID": "Q1",
+                        "applicationID": "7890",
+                        "responseText": "Student Response to question 1 on scholarship 12345"
+                    },
+                    ...
+                ]
+                
+            }
+
+### Get an Application [GET]
+
+### Update an Application [PUT]
+Update the responses to the questions associated with an application.  Students can edit their responses to application questions and submit them to update.  Faculty have no permissions to make changes.
+The Student ID and role are taken from the authentication token to verify identity/permissions.
+Updates the dateModified of the application automatically.
+
++ Request (application/json)
+
+        {
+            "responses":[
+                {
+                    "responseID": "1",
+                    "responseText": "Arthur, King of the Britons."
+                },
+                {
+                    "responseID": "2",
+                    "responseText": "To seek the Holy Grail."
+                },
+                {
+                    "responseID": "3",
+                    "responseText": "African or European Swallow?"
+                }
+            ]
+        }
+        
++ Response 200 (application/json)
+    + Body
+
+            {
+                "applicationID": "1",
+                "scholarshipID": "1",
+                "dateCreated": "2017-11-20 07:00:00",
+                "dateModified": "2017-11-20 08:36:21",
+                "userID": "12345678",
+                "responses":[
+                    {
+                        "responseID": "1",
+                        "responseText": "Arthur, King of the Britons."
+                    },
+                    {
+                        "responseID": "2",
+                        "responseText": "To seek the Holy Grail."
+                    },
+                    {
+                        "responseID": "3",
+                        "responseText": "African or European Swallow?"
+                    }
+                ]
+            }
+
+
+## Users Collection [/users]
+
+### Get a User [GET]
+
+### Get all the Students [GET]
+
+### Get all the Faculties [GET]
+
+### Create a User [POST]
+   
+### Full Update a User [PUT]
+Provides a mechanism to do a full updating for a user. The user's information will be updated based on the data from the JSON body that gets passed with the request, 
+and other information about the user that is not sent with the request will be set to null.
+
++ Request (application/json)
+
+        {
+            "firstName":"Michael",
+            "lastName":"Anderson",
+            "middleInitial": "K",
+            "gender":"M",
+            "birthDate":"1990-05-19",
+            "maritalStatus":"Married",
+            "address":"173 Skyline Drive",
+            "city":"Salt Lake City",
+            "state":"UT",
+            "zip":84401,
+            "homePhone":8012223456,
+            "majorGPA": 3.2,
+            "overallGPA": 3.1,
+            "ACTScore": 25,
+            "currentMajor": "Informational Technology",
+            "futureMajor": "Computer Engineering",
+            "currentCourses": [1022, 1030, 1400],
+            "previousCourses": [1023],
+            "apTests": ["Biology", "Chemistry", "Computer Science AB"],
+            "csTopicInterests": "cybersecurity",
+            "clubOrganizations": "ACM..."
+        }
+        
++ Response 200 (application/json)
+
+
+### Partial Update a User [PATCH]
+
+### Delete a User [DELETE]
+
+## Rating Collection [/rating]
+
+### Get All Rating [GET]
+Only Faculty login can get all rating
+
+### Get Composite Rating [GET]
+This route return a score student with his/her avg scholarship score. 
+
+Usage: BaseURI/scholarship/{scholarshipID}/ratings/{StudentID}
+
++ Request (application/json)
+
+        {
+            "Authorization": "Bearer [token]",
+        }
+        
++ Response 200 (application/json)
+    + Body
+        {
+            "studentID":"2",
+            "scholarshipID":"3",
+            "score":[["4.0000"]]
+        }

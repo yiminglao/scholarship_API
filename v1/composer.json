@@ -1,0 +1,18 @@
+{
+    "name": "weber/scholarship",
+    "description": "A RESTful API to handle Scholarship applications.",
+    "type": "project",
+    "minimum-stability": "stable",
+    "autoload": {
+        "psr-4": {
+            "Scholarship\\": "src/"
+        }
+    },
+    "require": {
+        "nikic/fast-route": "^1.2",
+        "firebase/php-jwt": "^4.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^6.4"
+    }
+}
